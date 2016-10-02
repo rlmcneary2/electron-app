@@ -45,6 +45,7 @@ Temporary Items
 
 # build related
 .vscode/**
+!.vscode/launch.json
 !.vscode/settings.json
 dist
 node_modules

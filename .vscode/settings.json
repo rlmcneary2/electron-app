@@ -6,7 +6,7 @@
         "**/.git": true,
         "**/.DS_Store": true,
         ".vscode": true,
-        "build": true,
+        "dist": true,
         "node_modules": true,
         "npm-debug.log": true
     },

@@ -1,0 +1,55 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug gulpfile",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/gulp/bin/gulp.js",
+            "stopOnEntry": false,
+            "args": [
+                "debug"
+            ],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": null,
+            "runtimeExecutable": null,
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "'debug'"
+            },
+            "externalConsole": false,
+            "sourceMaps": false,
+            "outDir": null
+        },
+        {
+            "name": "Electron",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/dist/app/main.js",
+            "stopOnEntry": true,
+            "args": [
+                "-dev-tools"
+            ],
+            "cwd": "${workspaceRoot}/dist/app",
+            "preLaunchTask": null,
+            "runtimeExecutable": "${workspaceRoot}/node_modules/electron-prebuilt/dist/electron.exe",
+            "linux": {
+                "runtimeExecutable": "${workspaceRoot}/node_modules/electron-prebuilt/dist/electron"
+            },
+            "osx": {
+                "runtimeExecutable": "${workspaceRoot}/node_modules/electron-prebuilt/dist/Electron.app/Contents/MacOS/Electron"
+            },
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "externalConsole": false,
+            "sourceMaps": false,
+            "outDir": null
+        }
+    ]
+}
