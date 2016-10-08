@@ -1,5 +1,5 @@
 # electron-app
-A starter project to create a basic [Electron](http://electron.atom.io/) application using [React](https://facebook.github.io/react/), [Redux](http://redux.js.org/), and [webpack](https://webpack.github.io/). Electron applications are cross platform applications that run on Windows, OSX, and Linux.
+A starter project to create a basic [Electron](http://electron.atom.io/) application using [React](https://facebook.github.io/react/), [Redux](http://redux.js.org/), [React-Intl](https://github.com/yahoo/react-intl), and [Webpack](https://webpack.github.io/). Electron applications are cross platform applications that run on Windows, OSX, and Linux.
 
 ## Prerequisites
 - [Node.js](https://nodejs.org) version 6 or later.
@@ -36,7 +36,7 @@ The configuration of the render process is defined by creating a file in the roo
 Command line parameters can also be used to control the behavior of the application. Currently the Dev Tools for debugging the render proces in Chromium can be displayed by including `-dev-tools` in the command line.
 
 ### Localization
-It's simple to localize text, numbers, dates, times and currency. The application already includes the [React Intl](https://github.com/yahoo/react-intl) package. React Intl uses [ICU message](http://userguide.icu-project.org/formatparse/messages) syntax. To take full advantage of the formatting options available you'll want familiarize yourself with it. 
+It's simple to localize text, numbers, dates, times, and currency. The application already includes the [React Intl](https://github.com/yahoo/react-intl) package. React Intl uses [ICU message](http://userguide.icu-project.org/formatparse/messages) syntax. To take full advantage of the formatting options available you'll want familiarize yourself with it. 
 
 Creating strings for display is done by adding JSON files to the **src/locale** directory. Files are named with the locale that they are associated with, for example English language strings for display in the United States should be placed into a file named **en-US.json**. Each key of the single JSON object in each file is an ID that will be assigned to an associated React Intl component. The value will be an ICU formatted string. There are trivial example files located in the **src/example** directory.
 
@@ -53,4 +53,27 @@ The UI is driven by code in the **src/render** directory. There are three places
 The **view** directory contains presentational and container components. To get Started add an **App.jsx** file and it will become the root of your application components. There is an example App.jsx file in **src/example/App.jsx**.
 
 ## Package
-The application can be packaged and run as a native application.
+The application can be packaged and run as a native application. Typically the application must be packaged on the same type of OS that it will run on. 
+
+### Windows
+Build and package the application on a Windows system.
+```
+npm run package:release
+```
+
+### OSX
+TBD
+
+### Linux
+TBD
+
+## Updating
+Once the repository has been cloned or forked you can update to the latest version by executing the following commands in the **electron-app** directory.
+```
+git checkout master
+git fetch electron-app
+git merge electron-app/master
+```
+
+## License
+MIT

@@ -137,7 +137,7 @@ function copyFile(sourceFilePath, destinationDir) {
             resolve(true);
         });
         outStream.on("error", err => {
-            console.log(`copyFile - error writing from '${sourceFilePath}' to '${destinationFilePath}': ${err.message || JSON.stringify(err)}`);
+            console.log(`copyFile - error writing from '${sourceFilePath}' to '${destinationFilePath}': ${err.message || JSON.stringify(err)}`); // eslint-disable-line no-console
         });
 
         fs.createReadStream(sourceFilePath)
@@ -172,19 +172,19 @@ function createConfig(sourceJsFilePath, destinationJsonFileName) {
             createDirectory(destinationDirectory)
                 .then(errDir => {
                     if (errDir) {
-                        console.log(`createConfig - error creating directory: ${errDir.message || JSON.stringify(errDir)}`);
+                        console.log(`createConfig - error creating directory: ${errDir.message || JSON.stringify(errDir)}`); // eslint-disable-line no-console
                     }
 
                     fs.writeFile(`${destinationDirectory}/${destinationJsonFileName}`, JSON.stringify(config, null, _isProduction ? 0 : 4), errWrite => {
                         if (errWrite) {
-                            console.log(`createConfig - error writing file: ${errWrite.message || JSON.stringify(errWrite)}`);
+                            console.log(`createConfig - error writing file: ${errWrite.message || JSON.stringify(errWrite)}`); // eslint-disable-line no-console
                         }
 
                         resolve();
                     });
                 });
         } catch (err) {
-            console.log(`createConfig - error: ${err.message || JSON.stringify(err)}`);
+            console.log(`createConfig - error: ${err.message || JSON.stringify(err)}`); // eslint-disable-line no-console
             resolve();
         }
     });
@@ -291,7 +291,7 @@ function deleteFile(fileName) {
 
                 fs.unlink(fileName, err => {
                     if (err) {
-                        console.log(`deleteFile - error deleting file '${fileName}': ${err.message || JSON.stringify(err)}`);
+                        console.log(`deleteFile - error deleting file '${fileName}': ${err.message || JSON.stringify(err)}`); // eslint-disable-line no-console
                     }
 
                     resolve(err ? false : true);

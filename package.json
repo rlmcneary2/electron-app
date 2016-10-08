@@ -1,7 +1,7 @@
 {
   "name": "electron-app",
-  "version": "1.0.0",
-  "description": "A basic Electron application using React, Redux, and Webpack.",
+  "version": "1.0.1",
+  "description": "A basic Electron application using React, Redux, React-Intl, and Webpack.",
   "main": "index.js",
   "scripts": {
     "clean": "gulp clean",
@@ -23,7 +23,7 @@
     "basic"
   ],
   "author": "Richard L. McNeary II",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/rlmcneary2/electron-app/issues"
   },
