@@ -20,7 +20,6 @@ const _RENDER_CONFIG_OUTPUT_FILE = "renderConfig.json";
 
 
 let _isProduction = false;
-let _defaultFilesCopied = [];
 
 
 gulp.task("build-application", gulp.parallel(buildAppJavascript, () => copyHtml(constants.srcRender, constants.distApp)));
@@ -130,11 +129,21 @@ function buildAppJavascript() {
 }
 
 function copyFile(sourceFilePath, destinationDir) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         const destinationFilePath = path.join(destinationDir, path.basename(sourceFilePath));
         const outStream = fs.createWriteStream(destinationFilePath);
         outStream.on("close", () => {
-            resolve(true);
+            // Copy file times.
+            fs.stat(sourceFilePath, (err, stats) => {
+                fs.utimes(destinationFilePath, stats.atime, stats.mtime, err => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+
+                    resolve(true);
+                });
+            });
         });
         outStream.on("error", err => {
             console.log(`copyFile - error writing from '${sourceFilePath}' to '${destinationFilePath}': ${err.message || JSON.stringify(err)}`); // eslint-disable-line no-console
@@ -156,7 +165,7 @@ function copyHtml(sourceDir, destinationDir) {
 }
 
 function createConfig(sourceJsFilePath, destinationJsonFileName) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         let config = {};
         try {
             // The URL params javascript file is a module that exports a
@@ -168,20 +177,12 @@ function createConfig(sourceJsFilePath, destinationJsonFileName) {
 
             config = configFunc(_isProduction);
 
-            const destinationDirectory = `${constants.dist}/${constants.distApp}`;
-            createDirectory(destinationDirectory)
-                .then(errDir => {
-                    if (errDir) {
-                        console.log(`createConfig - error creating directory: ${errDir.message || JSON.stringify(errDir)}`); // eslint-disable-line no-console
-                    }
-
-                    fs.writeFile(`${destinationDirectory}/${destinationJsonFileName}`, JSON.stringify(config, null, _isProduction ? 0 : 4), errWrite => {
-                        if (errWrite) {
-                            console.log(`createConfig - error writing file: ${errWrite.message || JSON.stringify(errWrite)}`); // eslint-disable-line no-console
-                        }
-
-                        resolve();
-                    });
+            writeFile(`${constants.dist}/${constants.distApp}/${destinationJsonFileName}`, JSON.stringify(config, null, _isProduction ? 0 : 4))
+                .then(() => {
+                    resolve();
+                })
+                .catch(err => {
+                    reject(err);
                 });
         } catch (err) {
             console.log(`createConfig - error: ${err.message || JSON.stringify(err)}`); // eslint-disable-line no-console
@@ -191,55 +192,32 @@ function createConfig(sourceJsFilePath, destinationJsonFileName) {
 }
 
 function createDefaultFiles() {
-    // Here default files are created if the application developer hasn't
-    // already created them. If default files are used - rather than developer
-    // overrides - delete the default files after the build is finished.
-    _defaultFilesCopied = [];
-
-    let promises = [
-
-        // Config data.
-        fileExists("mainConfig.js")
-            .then(exists => {
-                if (!exists) {
-                    _defaultFilesCopied.push("mainConfig.js");
-                    return copyFile("./src/example/mainConfig.js", "./");
+    // Check for default files and replace them if they are a default.
+    const creator = name => {
+        isDefaultFile(name)
+            .then(isDefault => {
+                if (!isDefault) {
+                    return;
                 }
-            }),
 
-        fileExists("renderConfig.js")
-            .then(exists => {
-                if (!exists) {
-                    _defaultFilesCopied.push("renderConfig.js");
-                    return copyFile("./src/example/renderConfig.js", "./");
-                }
-            }),
+                const sourceName = `./src/example/${path.basename(name)}`;
+                return createFileHash(sourceName)
+                    .then(hash => {
+                        return writeFile(`${sourceName}.hash`, hash);
+                    })
+                    .then(() => {
+                        const dir = path.dirname(name);
+                        return copyFile(sourceName, dir);
+                    });
+            });
+    };
 
-        // Locale data.
-        fileExists("./src/locale/en-US.json")
-            .then(exists => {
-                if (!exists) {
-                    _defaultFilesCopied.push("en-US.json");
-                    return copyFile("./src/example/en-US.json", "./src/locale/");
-                }
-            }),
-
-        fileExists("./src/locale/es-ES.json")
-            .then(exists => {
-                if (!exists) {
-                    _defaultFilesCopied.push("es-ES.json");
-                    return copyFile("./src/example/es-ES.json", "./src/locale/");
-                }
-            }),
-
-        // App.jsx
-        fileExists("./src/render/view/App.jsx")
-            .then(exists => {
-                if (!exists) {
-                    _defaultFilesCopied.push("App.jsx");
-                    return copyFile("./src/example/App.jsx", "./src/render/view/");
-                }
-            })
+    const promises = [
+        creator("./mainConfig.js"),
+        creator("./renderConfig.js"),
+        creator("./src/locale/en-US.json"),
+        creator("./src/locale/es-ES.json"),
+        creator("./src/render/view/App.jsx"),
     ];
 
     return Promise.all(promises);
@@ -253,29 +231,39 @@ function createDirectory(directoryPath) {
     });
 }
 
-function deleteDefaultFiles(force = false) {
-    // Warning: force will delete everything even files that weren't copied (i.e. created by an application developer).
+function createFileHash(file) {
+    return new Promise((resolve, reject) => {
+        fs.stat(file, (err, stats) => {
+            if (err) {
+                reject({ message: `File '${file}' does not exist.` });
+            }
 
-    const promises = [];
-    if (force || _defaultFilesCopied.includes("mainConfig.js")) {
-        promises.push(deleteFile("mainConfig.js"));
-    }
+            const name = path.basename(file);
+            const data = `'${name}' '${stats.mtime}' '${stats.size}'`;
+            resolve(new Buffer(data, "utf8").toString("base64"));
+        });
+    });
+}
 
-    if (force || _defaultFilesCopied.includes("renderConfig.js")) {
-        promises.push(deleteFile("renderConfig.js"));
-    }
+function deleteDefaultFiles() {
+    const deleter = (name) => {
+        isDefaultFile(name)
+            .then(isDefault => {
+                if (!isDefault) {
+                    return;
+                }
 
-    if (force || _defaultFilesCopied.includes("en-US.json")) {
-        promises.push(deleteFile("./src/locale/en-US.json"));
-    }
+                return deleteFile(name);
+            });
+    };
 
-    if (force || _defaultFilesCopied.includes("es-ES.json")) {
-        promises.push(deleteFile("./src/locale/es-ES.json"));
-    }
-
-    if (force || _defaultFilesCopied.includes("App.jsx")) {
-        promises.push(deleteFile("./src/render/view/App.jsx"));
-    }
+    const promises = [
+        deleter("./mainConfig.js"),
+        deleter("./renderConfig.js"),
+        deleter("./src/locale/en-US.json"),
+        deleter("./src/locale/es-ES.json"),
+        deleter("./src/render/view/App.jsx"),
+    ];
 
     return Promise.all(promises);
 }
@@ -326,5 +314,73 @@ function fileExists(file) {
         fs.stat(file, err => {
             resolve(!err);
         });
+    });
+}
+
+function isDefaultFile(name) {
+    return fileExists(name)
+        .then(exists => {
+            // If the target file doesn't exist then it is considered to be a default file.
+            if (!exists) {
+                return true;
+            }
+
+            const sourceName = path.basename(name);
+            const sourceHashName = `./src/example/${sourceName}.hash`;
+            let sourceHash;
+            return fileExists(sourceHashName)
+                .then(sourceHashExists => {
+                    if (!sourceHashExists) {
+                        return createFileHash(name);
+                    } else {
+                        return readFile(sourceHashName);
+                    }
+                })
+                .then(hash => {
+                    sourceHash = hash;
+                    return createFileHash(name);
+                })
+                .then(targetHash => {
+                    return sourceHash === targetHash;
+                });
+        });
+}
+
+function readFile(name) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(name, (err, contents) => {
+            if (err) {
+                console.log(`readFile - error reading file '${name}': ${err.message || JSON.stringify(err)}`); // eslint-disable-line no-console
+                reject(`error reading file ${name}: ${err.message || JSON.stringify(err)}`);
+                return;
+            }
+
+            const text = String.fromCharCode.apply(null, contents);
+            resolve(text);
+        });
+    });
+}
+
+function writeFile(name, contents) {
+    return new Promise((resolve, reject) => {
+        const dir = path.dirname(name);
+        createDirectory(dir)
+            .then(errDir => {
+                if (errDir) {
+                    console.log(`writeFile - error creating directory: ${errDir.message || JSON.stringify(errDir)}`); // eslint-disable-line no-console
+                    reject(`error creating directory: ${errDir.message || JSON.stringify(errDir)}`);
+                    return;
+                }
+
+                fs.writeFile(name, contents, errWrite => {
+                    if (errWrite) {
+                        console.log(`writeFile - error writing file: ${errWrite.message || JSON.stringify(errWrite)}`); // eslint-disable-line no-console
+                        reject(`error writing file: ${errDir.message || JSON.stringify(errDir)}`);
+                        return;
+                    }
+
+                    resolve();
+                });
+            });
     });
 }

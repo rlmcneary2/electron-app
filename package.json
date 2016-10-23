@@ -1,6 +1,6 @@
 {
   "name": "electron-app",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A basic Electron application using React, Redux, React-Intl, and Webpack.",
   "main": "index.js",
   "scripts": {
