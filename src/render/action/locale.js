@@ -39,8 +39,8 @@ module.exports = {
                     }
 
                     // Get an object that contains the localized strings. That could be done by requiring the JSON files, downloading them from a server, or reading them from a file using IPC.                    
-                    allMessages["en-US"] = require("../../locale/en-US.json");
-                    allMessages["es-ES"] = require("../../locale/es-ES.json");
+                    allMessages["en-US"] = require("../../locale/en-US.example.json");
+                    allMessages["es-ES"] = require("../../locale/es-ES.example.json");
                     // Require other localized strings the application needs.
 
                     // Return the object (messages) from the JSON file that matches the requested locale.
