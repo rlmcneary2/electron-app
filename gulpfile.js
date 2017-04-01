@@ -1,4 +1,5 @@
 "use strict";
+/* eslint-disable no-console */
 
 
 const constants = require("./buildConstants");
@@ -153,7 +154,7 @@ function createConfig(sourceJsFilePath, destinationJsonFileName) {
                     reject(err);
                 });
         } catch (err) {
-            console.log(`createConfig - error: ${err.message || JSON.stringify(err)}`); // eslint-disable-line no-console
+            console.log(`createConfig - error: ${err.message || JSON.stringify(err)}`);
             resolve();
         }
     });
@@ -194,14 +195,14 @@ function writeFile(name, contents) {
         createDirectory(dir)
             .then(errDir => {
                 if (errDir) {
-                    console.log(`writeFile - error creating directory: ${errDir.message || JSON.stringify(errDir)}`); // eslint-disable-line no-console
+                    console.log(`writeFile - error creating directory: ${errDir.message || JSON.stringify(errDir)}`);
                     reject(`error creating directory: ${errDir.message || JSON.stringify(errDir)}`);
                     return;
                 }
 
                 fs.writeFile(name, contents, errWrite => {
                     if (errWrite) {
-                        console.log(`writeFile - error writing file: ${errWrite.message || JSON.stringify(errWrite)}`); // eslint-disable-line no-console
+                        console.log(`writeFile - error writing file: ${errWrite.message || JSON.stringify(errWrite)}`);
                         reject(`error writing file: ${errDir.message || JSON.stringify(errDir)}`);
                         return;
                     }

@@ -5,6 +5,7 @@ const fs = require("fs");
 const ipc = require("electron").ipcMain;
 const ipcShared = require("./ipcShared");
 
+
 module.exports = {
 
     asyncRequestChannelName: "async-renderer-event",
@@ -23,7 +24,7 @@ module.exports = {
                 }
 
                 default:
-                    console.log(`rendererEvents - no handler for type '${args.type}'.`);
+                    console.log(`rendererEvents - no handler for type '${args.type}'.`); // eslint-disable-line no-console
                     break;
             }
         });
@@ -34,7 +35,7 @@ module.exports = {
 
 function log(evt, args) {
     if (args && args.data) {
-        console.log(`${args.data.type} ${args.data.message}`);
+        console.log(`${args.data.type} ${args.data.message}`); // eslint-disable-line no-console
     }
 }
 

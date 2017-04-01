@@ -1,4 +1,5 @@
 "use strict";
+/* eslint-disable no-console */
 
 
 // This file will be executed in the main process (the Node.js environment). It
