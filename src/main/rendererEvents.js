@@ -1,17 +1,15 @@
 "use strict";
 
 
+const constants = require("./constants");
 const fs = require("fs");
 const ipc = require("electron").ipcMain;
-const ipcShared = require("./ipcShared");
 
 
 module.exports = {
 
-    asyncRequestChannelName: "async-renderer-event",
-
     connect: () => {
-        ipc.on(ipcShared.asyncRequestChannelName, (evt, args) => {
+        ipc.on(constants.AsyncRequestChannelName, (evt, args) => {
             switch (args.type) {
                 case "log": {
                     log(evt, args);
@@ -50,7 +48,7 @@ function readTextFile(evt, args) {
         const name = args.data.name;
         fs.createReadStream(name, { encoding: "utf-8" })
             .on("data", (chunk) => {
-                evt.sender.send(ipcShared.asyncResponseChannelName, { id: args.id, chunk });
+                evt.sender.send(constants.AsyncResponseChannelName, { id: args.id, chunk });
             })
             .on("end", () => {
                 resolve();
@@ -60,9 +58,9 @@ function readTextFile(evt, args) {
             });
     })
         .then(() => {
-            evt.sender.send(ipcShared.asyncResponseChannelName, Object.assign({}, args));
+            evt.sender.send(constants.AsyncResponseChannelName, Object.assign({}, args));
         })
         .catch(err => {
-            evt.sender.send(ipcShared.asyncResponseChannelName, Object.assign({ error: err }, args));
+            evt.sender.send(constants.AsyncResponseChannelName, Object.assign({ error: err }, args));
         });
 }

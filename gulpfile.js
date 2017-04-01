@@ -28,7 +28,8 @@ gulp.task("build-application", gulp.parallel(buildAppJavascript, () => copyHtml(
 
 gulp.task("build-electron", gulp.parallel(
     () => copyFiles(constants.srcMain, constants.distApp, "js"),
-    () => copyFiles(constants.srcMain, constants.distApp, "json")
+    () => copyFiles(constants.srcMain, constants.distApp, "json"),
+    () => copyFile("./src/constants.js", constants.distApp)
 ));
 
 gulp.task("clean", () => {
@@ -121,6 +122,11 @@ function buildAppJavascript() {
             resolve();
         });
     });
+}
+
+function copyFile(source, destinationDir) {
+    return gulp.src([source])
+        .pipe(gulp.dest(`${constants.dist}/${destinationDir}/`));
 }
 
 function copyFiles(sourceDir, destinationDir, ext) {

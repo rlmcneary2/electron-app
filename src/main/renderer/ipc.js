@@ -1,8 +1,8 @@
 "use strict";
 
 
+const constants = require("../../constants");
 const ipcRenderer = require("electron").ipcRenderer;
-const ipcShared = require("../ipcShared");
 
 
 let _asyncResponseConnected = false;
@@ -97,8 +97,8 @@ function onAsyncResponse(evt, args) {
 function sendRequest(request) {
     if (!_asyncResponseConnected) {
         _asyncResponseConnected = true;
-        ipcRenderer.on("async-event-response", onAsyncResponse);
+        ipcRenderer.on(constants.AsyncResponseChannelName, onAsyncResponse);
     }
 
-    ipcRenderer.send(ipcShared.asyncRequestChannelName, request);
+    ipcRenderer.send(constants.AsyncRequestChannelName, request);
 }
