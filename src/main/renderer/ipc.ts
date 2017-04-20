@@ -1,8 +1,8 @@
 "use strict";
 
 
-const constants = require("../../constants");
-const { ipcRenderer } = require("electron");
+import * as constants from "../../constants";
+import {ipcRenderer} from "electron-prebuilt";
 
 
 let _asyncResponseConnected = false;
@@ -10,7 +10,7 @@ const _requests = new Map();
 let _requestId = 0;
 
 
-module.exports = {
+export default {
 
     log: (message, messageType = "   ") => {
         const r = createRequest("log", { message, type: messageType });
