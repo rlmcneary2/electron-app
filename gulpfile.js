@@ -99,7 +99,7 @@ gulp.task("package-release", gulp.series("clean", "release", callback => { _elec
 });
 
 
-function buildAppJavascript() {
+async function buildAppJavascript() {
     return new Promise((resolve, reject) => {
         const config = webpackConfig;
         config.plugins = config.plugins || [];
@@ -139,8 +139,8 @@ function copyHtml(sourceDir, destinationDir) {
         .pipe(gulp.dest(`${constants.dist}/${destinationDir}/`));
 }
 
-function createConfig(sourceJsFilePath, destinationJsonFileName) {
-    return new Promise((resolve, reject) => {
+async function createConfig(sourceJsFilePath, destinationJsonFileName) {
+    return new Promise(async (resolve, reject) => {
         let config = {};
         try {
             // The URL params javascript file is a module that exports a
@@ -152,13 +152,12 @@ function createConfig(sourceJsFilePath, destinationJsonFileName) {
 
             config = typeof configFunc === "function" ? configFunc(_isProduction) : configFunc;
 
-            writeFile(`${constants.dist}/${constants.distApp}/${destinationJsonFileName}`, JSON.stringify(config, null, _isProduction ? 0 : 4))
-                .then(() => {
-                    resolve();
-                })
-                .catch(err => {
-                    reject(err);
-                });
+            try {
+                await writeFile(`${constants.dist}/${constants.distApp}/${destinationJsonFileName}`, JSON.stringify(config, null, _isProduction ? 0 : 4));
+                resolve();
+            } catch (err) {
+                reject(err);
+            }
         } catch (err) {
             console.log(`createConfig - error: ${err.message || JSON.stringify(err)}`);
             resolve();
@@ -166,7 +165,7 @@ function createConfig(sourceJsFilePath, destinationJsonFileName) {
     });
 }
 
-function createDirectory(directoryPath) {
+async function createDirectory(directoryPath) {
     return new Promise(resolve => {
         mkdirp(directoryPath, null, err => {
             resolve(err);
@@ -174,7 +173,7 @@ function createDirectory(directoryPath) {
     });
 }
 
-function electronPackager(options) {
+async function electronPackager(options) {
     return new Promise((resolve, reject) => {
         const packagerOptions = Object.assign({
             asar: _isProduction,
@@ -195,26 +194,24 @@ function electronPackager(options) {
     });
 }
 
-function writeFile(name, contents) {
-    return new Promise((resolve, reject) => {
+async function writeFile(name, contents) {
+    return new Promise(async (resolve, reject) => {
         const dir = path.dirname(name);
-        createDirectory(dir)
-            .then(errDir => {
-                if (errDir) {
-                    console.log(`writeFile - error creating directory: ${errDir.message || JSON.stringify(errDir)}`);
-                    reject(`error creating directory: ${errDir.message || JSON.stringify(errDir)}`);
-                    return;
-                }
+        const errDir = await createDirectory(dir);
+        if (errDir) {
+            console.log(`writeFile - error creating directory: ${errDir.message || JSON.stringify(errDir)}`);
+            reject(`error creating directory: ${errDir.message || JSON.stringify(errDir)}`);
+            return;
+        }
 
-                fs.writeFile(name, contents, errWrite => {
-                    if (errWrite) {
-                        console.log(`writeFile - error writing file: ${errWrite.message || JSON.stringify(errWrite)}`);
-                        reject(`error writing file: ${errDir.message || JSON.stringify(errDir)}`);
-                        return;
-                    }
+        fs.writeFile(name, contents, errWrite => {
+            if (errWrite) {
+                console.log(`writeFile - error writing file: ${errWrite.message || JSON.stringify(errWrite)}`);
+                reject(`error writing file: ${errDir.message || JSON.stringify(errDir)}`);
+                return;
+            }
 
-                    resolve();
-                });
-            });
+            resolve();
+        });
     });
 }
