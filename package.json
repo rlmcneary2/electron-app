@@ -47,6 +47,8 @@
     "gulp-util": "^3.0.7",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.5.4",
+    "ts-loader": "^2.0.3",
+    "typescript": "^2.2.2",
     "webpack": "^2.2.1",
     "webpack-target-electron-renderer": "^0.4.0"
   },
