@@ -2,6 +2,9 @@
   "name": "electron-app",
   "version": "1.0.4",
   "description": "A basic Electron application using React, Redux, React-Intl, and Webpack.",
+  "engines": {
+    "node": ">=7.6.0"
+  },
   "main": "index.js",
   "scripts": {
     "clean": "gulp clean",
