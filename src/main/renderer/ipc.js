@@ -2,7 +2,7 @@
 
 
 const constants = require("../../constants");
-const ipcRenderer = require("electron").ipcRenderer;
+const { ipcRenderer } = require("electron");
 
 
 let _asyncResponseConnected = false;

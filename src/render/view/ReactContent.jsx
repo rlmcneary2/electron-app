@@ -2,14 +2,14 @@
 
 
 const App = require("./App.example.jsx"); // Replace the App component or its contents with your application.
-const IntlProvider = require("react-intl").IntlProvider;
+const { IntlProvider } = require("react-intl");
 const React = require("react");
 const redux = require("react-redux");
-const Provider = redux.Provider;
+const { Provider } = redux;
 
 
 const ReactContent = props => {
-    if (!props.locale){
+    if (!props.locale) {
         return null;
     }
 
